@@ -12,6 +12,10 @@
 	"developer": "Nwo5",
 	"tags": ["editor", "enhancement", "utility", "offline"],
 	"description": "a bunch of snap related shenanigans",
+	"links": {
+		"source": "https://github.com/Nwo5-trg/Free-Snap",
+		"community": "https://discord.gg/AeFeYWGUxZ"
+	},
 	"settings": {
 		"grid-size": {
 			"type": "float",
