@@ -1,0 +1,78 @@
+{
+	"geode": "4.6.0",
+	"gd": {
+		"win": "2.2074",
+		"android": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074"
+	},
+	"id": "nwo5.free_snap",
+	"name": "Free Snap",
+	"version": "v1.0.0",
+	"developer": "Nwo5",
+	"tags": ["editor", "enhancement", "utility", "offline"],
+	"description": "a bunch of snap related shenanigans",
+	"settings": {
+		"grid-size": {
+			"type": "float",
+			"name": "Grid Size",
+			"default": 15,
+			"min": 0.5,
+			"max": 120
+		},
+		"snap-object-color": {
+			"type": "rgb",
+			"name": "Snap Object Color",
+			"description": "what color the selected object will turn to indicate snapping",
+			"default": [255, 127, 0]
+		},
+		"select-object-color": {
+			"type": "rgb",
+			"name": "Select Object Color",
+			"default": [0, 255, 0]
+		},
+		"snap-indicator": {
+			"type": "bool",
+			"name": "Enable Snap Indicator",
+			"description": "shows a preview of where the objects gonna snap to",
+			"default": true
+		},
+		"snap-indicator-fill": {
+			"type": "rgba",
+			"name": "Snap Object Color",
+			"default": [255, 127, 0, 0.25]
+		},
+		"snap-indicator-outline-thickness": {
+			"type": "float",
+			"name": "Snap Indicator Outline Thickness",
+			"default": 0.75,
+			"min": 0.1,
+			"max": 10
+		},
+		"snap-indicator-outline": {
+			"type": "rgba",
+			"name": "Snap Indicator Outline",
+			"default": [255, 127, 0, 255]
+		},
+		"snap-chroma": {
+			"type": "bool",
+			"name": "Snap Chroma",
+			"description": "*paws at you*",
+			"default": false
+		},
+		"select-chroma": {
+			"type": "bool",
+			"name": "Select Chroma",
+			"description": "all selected objects come out as femboys",
+			"default": false
+		},
+		"chroma-speed": {
+			"type": "float",
+			"name": "she/they pronouns btw",
+			"description": "gay speed - mrweow mrp rawr",
+			"default": 0.25,
+			"min": 0.1,
+			"max": 10
+		}
+	}
+}
