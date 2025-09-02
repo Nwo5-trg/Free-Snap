@@ -7,6 +7,7 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
     struct Fields {
         bool doSnap;
         // robtops is 0 whenevr moving so
+        // ok i learned i can use end swipe maybe but shhhh
         CCPoint lastTouchPos;
 
         bool snapIndicator;
@@ -104,7 +105,7 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         if (objs->count() == 0) return;
 
         for (auto obj : CCArrayExt<GameObject*>(objs)) {
-            obj->setColor(fields->selectObjectColor);
+            obj->selectObject(fields->selectObjectColor);
         }
 
         // Dictionary | Definitions from Oxford Languages
@@ -116,7 +117,7 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         // persecuted, harassed, or betrayed by others, occurring as part of a mental condition.
         if (m_continueSwipe && m_snapObjectExists && m_snapObject) {
             updateSnapPreview(m_snapObject);
-            m_snapObject->setColor(fields->snapObjectColor);
+            m_snapObject->selectObject(fields->snapObjectColor);
         }
     }
 
