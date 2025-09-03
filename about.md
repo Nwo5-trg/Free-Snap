@@ -18,3 +18,8 @@ awww
 i found out u can use <c-fc1703>c</c><c-fc8803>o</c><c-fcd303>l</c><c-14fc03>o</c><c-0367fc>r</c><c-fc03ce>s</c> and stuff with geodes markdown stuff
 
 btw im proud of this mod logo ok it took me like half an hour but i liek it >w<
+
+## Credits
+- ***Brittank*** v1.0.1 bug reports
+- ***Alpha*** v1.0.1 bug reports
+- ***Shaday*** v1.0.1 bug reports

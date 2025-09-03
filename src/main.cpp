@@ -115,7 +115,7 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         // "I got into a state of paranoia about various night noises which in daylight seems utterly silly"
         // 2. the unwarranted or delusional belief that one is being 
         // persecuted, harassed, or betrayed by others, occurring as part of a mental condition.
-        if (m_continueSwipe && m_snapObjectExists && m_snapObject) {
+        if (m_continueSwipe && m_snapObjectExists && m_snapObject && fields->doSnap) {
             updateSnapPreview(m_snapObject);
             m_snapObject->selectObject(fields->snapObjectColor);
         }
