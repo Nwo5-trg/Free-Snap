@@ -1,3 +1,8 @@
+## v1.0.2
+- **Added** reorganized the code a lil
+
+- **Fixed** live color preview i think
+
 ## v1.0.1
 - **Fixed** obj color 2 not being updated
 - **Fixed** i wasnt checking snap im killing myself

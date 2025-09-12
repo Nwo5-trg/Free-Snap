@@ -23,3 +23,5 @@ btw im proud of this mod logo ok it took me like half an hour but i liek it >w<
 - ***Brittank*** v1.0.1 bug reports
 - ***Alpha*** v1.0.1 bug reports
 - ***Shaday*** v1.0.1 bug reports
+- ***1Aero1*** v1.0.2 bug reports
+*these credits feel kinda lame but i dont remmeber specifically wat ppl reported sowwyy*

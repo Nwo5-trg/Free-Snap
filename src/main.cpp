@@ -1,26 +1,13 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
+#include "shared/Settings.hpp"
+#include "shared/Cache.hpp"
+#include "utils/Utils.hpp"
 
 using namespace geode::prelude;
 
 class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half of it is from months ago
     struct Fields {
-        bool doSnap;
-        // robtops is 0 whenevr moving so
-        // ok i learned i can use end swipe maybe but shhhh
-        CCPoint lastTouchPos;
-
-        bool snapIndicator;
-        bool selectChroma;
-        bool snapChroma;
-        float chromaSpeed;
-        float snapIndicatorOutlineThickness;
-        float gridSize;
-        ccColor3B selectObjectColor;
-        ccColor3B snapObjectColor;
-        ccColor4F snapIndicatorFill;
-        ccColor4F snapIndicatorOutline;
-
         CCLayer* snapLayer;
         CCDrawNode* snapDraw;
         CCNodeRGBA* snapChromaNode;
@@ -45,30 +32,18 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         layer->addChild(draw);
         fields->snapDraw = draw;
 
-        fields->doSnap = false;
-
-        auto mod = Mod::get();
-        fields->snapIndicator = mod->getSettingValue<bool>("snap-indicator");
-        fields->snapChroma = mod->getSettingValue<bool>("snap-chroma");
-        fields->selectChroma = mod->getSettingValue<bool>("select-chroma");
-        fields->chromaSpeed = mod->getSettingValue<double>("chroma-speed");
-        fields->snapIndicatorOutlineThickness = mod->getSettingValue<double>("snap-indicator-outline-thickness");
-        fields->gridSize = mod->getSettingValue<double>("grid-size");
-        fields->selectObjectColor = mod->getSettingValue<ccColor3B>("select-object-color");
-        fields->snapObjectColor = mod->getSettingValue<ccColor3B>("snap-object-color");
-        fields->snapIndicatorFill = ccc4FFromccc4B(mod->getSettingValue<ccColor4B>("snap-indicator-fill"));
-        fields->snapIndicatorOutline = ccc4FFromccc4B(mod->getSettingValue<ccColor4B>("snap-indicator-outline"));
+        Cache::doSnap = false;
 
         // idc if its like the same thing repeated twice i dont feel like refactoring its late
         auto snapChromaNode = CCNodeRGBA::create();
         snapChromaNode->runAction(CCRepeatForever::create(
             CCSequence::create(
-                CCTintTo::create(fields->chromaSpeed, 255, 128, 128), 
-                CCTintTo::create(fields->chromaSpeed, 255, 255, 128),
-                CCTintTo::create(fields->chromaSpeed, 128, 255, 128), 
-                CCTintTo::create(fields->chromaSpeed, 128, 255, 255),
-                CCTintTo::create(fields->chromaSpeed, 128, 128, 255), 
-                CCTintTo::create(fields->chromaSpeed, 255, 128, 255),
+                CCTintTo::create(Settings::chromaSpeed, 255, 128, 128), 
+                CCTintTo::create(Settings::chromaSpeed, 255, 255, 128),
+                CCTintTo::create(Settings::chromaSpeed, 128, 255, 128), 
+                CCTintTo::create(Settings::chromaSpeed, 128, 255, 255),
+                CCTintTo::create(Settings::chromaSpeed, 128, 128, 255), 
+                CCTintTo::create(Settings::chromaSpeed, 255, 128, 255),
                 nullptr
             )
         ));
@@ -78,12 +53,12 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         auto selectChromaNode = CCNodeRGBA::create();
         selectChromaNode->runAction(CCRepeatForever::create(
             CCSequence::create(
-                CCTintTo::create(fields->chromaSpeed, 128, 255, 255),
-                CCTintTo::create(fields->chromaSpeed, 128, 128, 255), 
-                CCTintTo::create(fields->chromaSpeed, 255, 128, 255),
-                CCTintTo::create(fields->chromaSpeed, 255, 128, 128), 
-                CCTintTo::create(fields->chromaSpeed, 255, 255, 128),
-                CCTintTo::create(fields->chromaSpeed, 128, 255, 128), 
+                CCTintTo::create(Settings::chromaSpeed, 128, 255, 255),
+                CCTintTo::create(Settings::chromaSpeed, 128, 128, 255), 
+                CCTintTo::create(Settings::chromaSpeed, 255, 128, 255),
+                CCTintTo::create(Settings::chromaSpeed, 255, 128, 128), 
+                CCTintTo::create(Settings::chromaSpeed, 255, 255, 128),
+                CCTintTo::create(Settings::chromaSpeed, 128, 255, 128), 
                 nullptr
             )
         ));
@@ -91,88 +66,92 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
         fields->selectChromaNode = selectChromaNode;
 
         CCDirector::sharedDirector()->getScheduler()->scheduleSelector(
-            schedule_selector(EditUI::updateLoop), this, 0, false
+            schedule_selector(EditUI::updateSelect), this, 0, false
         );
 
         return true;
     }
 
-    void updateLoop(float dt) {
+    void updateSelect(float dt) {
         auto fields = m_fields.self();
         tryMakeColorsGay();
         
         auto objs = getSelectedObjects();
         if (objs->count() == 0) return;
 
+        bool shouldntColorObjects = m_colorOverlay || m_hsvOverlay;
+
+        // touches happen before schedulers so this works :3c
         for (auto obj : CCArrayExt<GameObject*>(objs)) {
-            obj->selectObject(fields->selectObjectColor);
+            if (shouldntColorObjects) obj->updateObjectEditorColor();
+            else obj->selectObject(Settings::selectObjectColor);
         }
 
-        // Dictionary | Definitions from Oxford Languages
-        // par·a·noi·a | /ˌperəˈnoiə/
-        // noun | noun: paranoia
-        // 1. unjustified suspicion and mistrust of other people or their actions.
-        // "I got into a state of paranoia about various night noises which in daylight seems utterly silly"
-        // 2. the unwarranted or delusional belief that one is being 
-        // persecuted, harassed, or betrayed by others, occurring as part of a mental condition.
-        if (m_continueSwipe && m_snapObjectExists && m_snapObject && fields->doSnap) {
+        if (m_continueSwipe && m_snapObjectExists && Cache::doSnap) {
             updateSnapPreview(m_snapObject);
-            m_snapObject->selectObject(fields->snapObjectColor);
+            if (shouldntColorObjects) m_snapObject->updateObjectEditorColor();
+            else m_snapObject->selectObject(Settings::snapObjectColor);
         }
     }
 
     bool ccTouchBegan(CCTouch* p0, CCEvent* p1) {
         if (!EditorUI::ccTouchBegan(p0, p1)) return false;
+
         auto gameManager = GameManager::sharedState();
         if (gameManager->getGameVariable("0008")) { // dumb workaround for disabling snap
             gameManager->setGameVariable("0008", false);
-            m_fields->doSnap = true;
+            Cache::doSnap = true;
+            Cache::lastTouchPos = m_editorLayer->m_objectLayer->convertTouchToNodeSpace(p0);
         }
+
         return true;
     }
 
     void ccTouchMoved(CCTouch* p0, CCEvent* p1) {
-        m_fields->lastTouchPos = m_editorLayer->m_objectLayer->convertTouchToNodeSpace(p0);
+        Cache::lastTouchPos = m_editorLayer->m_objectLayer->convertTouchToNodeSpace(p0);
         EditorUI::ccTouchMoved(p0, p1);
     }
 
     void ccTouchEnded(CCTouch* p0, CCEvent* p1) {
-        auto fields = m_fields.self();
+        if (!Cache::doSnap) {
+            EditorUI::ccTouchEnded(p0, p1);
+            return;
+        }
 
         bool continueSwipe = m_continueSwipe;
-        // whaterver i said in `updateLoop()`
         auto obj = m_snapObjectExists ? m_snapObject : nullptr;
 
         EditorUI::ccTouchEnded(p0, p1);
 
-        if (!fields->doSnap) return;
         GameManager::sharedState()->setGameVariable("0008", true);
-
-        fields->snapDraw->clear();
+        m_fields->snapDraw->clear();
 
         if (continueSwipe && obj) {
-            auto snappedPos = getSnappedPos(obj);
+            auto snappedPos = Utils::getSnappedPos(obj);
             auto delta = snappedPos - obj->getPosition();
 
             auto objs = getSelectedObjects();
             for (auto obj : CCArrayExt<GameObject*>(objs)) {
                 this->moveObject(obj, delta);
             }
+
             this->updateButtons();
             this->updateObjectInfoLabel();
-            if (m_rotationControl->isVisible()) this->activateRotationControl(nullptr);
+            if (m_rotationControl->isVisible()) {
+                this->activateRotationControl(nullptr);
+            }
         }
 
-        fields->doSnap = false;
+        Cache::doSnap = false;
     }
 
     void updateSnapPreview(GameObject* obj) {
         auto fields = m_fields.self();
 
-        if (!fields->snapIndicator) return;
+        if (!Settings::snapIndicator) return;
 
-        auto pos = getSnappedPos(obj);
-        auto scale = (obj->getScaledContentSize() - fields->snapIndicatorOutlineThickness / 2) / 2;
+        auto pos = Utils::getSnappedPos(obj);
+        auto scale = (obj->getScaledContentSize() - Settings::snapIndicatorOutlineThickness / 2) / 2;
         float rotation = obj->getRotation();
 
         CCPoint v[] = {
@@ -182,59 +161,36 @@ class $modify(EditUI, EditorUI) { // ok dont judge me too bad for my code half o
 
         if (rotation != 0.0f) {
             float rad = -rotation * 0.017453f;
-            v[0] = rotatePoint(v[0], pos, rad);
-            v[1] = rotatePoint(v[1], pos, rad);
-            v[2] = rotatePoint(v[2], pos, rad);
-            v[3] = rotatePoint(v[3], pos, rad);
+            v[0] = Utils::rotatePoint(v[0], pos, rad);
+            v[1] = Utils::rotatePoint(v[1], pos, rad);
+            v[2] = Utils::rotatePoint(v[2], pos, rad);
+            v[3] = Utils::rotatePoint(v[3], pos, rad);
         }
 
         fields->snapDraw->clear(); 
         fields->snapDraw->drawPolygon(
-            v, 4, fields->snapIndicatorFill, 
-            fields->snapIndicatorOutlineThickness, 
-            fields->snapIndicatorOutline
+            v, 4, Settings::snapIndicatorFill, 
+            Settings::snapIndicatorOutlineThickness, 
+            Settings::snapIndicatorOutline
         );
     }
 
     void tryMakeColorsGay() {
         auto fields = m_fields.self();
 
-        if (fields->snapChroma) {
+        if (Settings::snapChroma) {
             auto chroma = ccc4FFromccc3B(
                 // be gay do programming war crimes
-                (fields->snapObjectColor = fields->snapChromaNode->getColor())
+                (Settings::snapObjectColor = fields->snapChromaNode->getColor())
             );
-            auto& fill = fields->snapIndicatorFill;
+            auto& fill = Settings::snapIndicatorFill;
             fill.r = chroma.r; fill.g = chroma.g; fill.b = chroma.b;
-            auto& outline = fields->snapIndicatorOutline;
+            auto& outline = Settings::snapIndicatorOutline;
             outline.r = chroma.r; outline.g = chroma.g; outline.b = chroma.b;
         }
     
-        if (fields->selectChroma) fields->selectObjectColor = fields->selectChromaNode->getColor();
-    }
-
-    CCPoint getSnappedPos(GameObject* obj) {
-        auto fields = m_fields.self();
-
-        auto offset = offsetForKey(obj->m_objectID);
-        // ifitworksitworksihonesltydontunderstanditbutidontcare
-        auto pos = fields->lastTouchPos - offset;
-        float objSize = ObjectToolbox::sharedState()->gridNodeSizeForKey(obj->m_objectID);;
-        float gridSize = m_fields->gridSize * (objSize / 30.0f);
-
-        return ccp(
-            round(pos.x / gridSize) * gridSize,
-            round(pos.y / gridSize) * gridSize
-        ) + offset;
-    }
-
-    CCPoint rotatePoint(CCPoint p, CCPoint pivot, float rad) {
-        p = p - pivot;
-        float c = cosf(rad); 
-        float s = sinf(rad);
-        float t = p.x;
-        p.x = t * c - p.y * s + pivot.x;
-        p.y = t * s + p.y * c + pivot.y;
-        return p;
+        if (Settings::selectChroma) {
+            Settings::selectObjectColor = fields->selectChromaNode->getColor();
+        }
     }
 };
